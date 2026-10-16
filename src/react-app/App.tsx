@@ -4,7 +4,7 @@ import cloudflareLogo from "./assets/Cloudflare_Logo.svg";
 import honoLogo from "./assets/hono.svg";
 import reactLogo from "./assets/react.svg";
 
-import "./App.css";
+import "./app.css";
 
 const viteLogo = "/vite.svg";
 
