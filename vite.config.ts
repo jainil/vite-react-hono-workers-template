@@ -6,14 +6,12 @@ import ultraciteReact from "ultracite/oxlint/react";
 import vitest from "ultracite/oxlint/vitest";
 import { defineConfig, lazyPlugins } from "vite-plus";
 
-const generated = [
-  "dist/**",
-  ".wrangler/**",
-  "coverage/**",
-  "worker-configuration.d.ts",
-];
+const generated = ["dist/**", ".wrangler/**", ".cloudflare/**", "coverage/**"];
 
 export default defineConfig(({ mode }) => ({
+  environments: {
+    ssr: { build: { sourcemap: true } },
+  },
   fmt: {
     ...ultraciteFmt,
     ignorePatterns: [

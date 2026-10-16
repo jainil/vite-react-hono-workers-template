@@ -1,0 +1,12 @@
+import { defineConfig } from "cf/config";
+
+export default defineConfig({
+  worker: {
+    assets: { notFoundHandling: "single-page-application" },
+    compatibilityDate: "2025-10-08",
+    compatibilityFlags: ["nodejs_compat"],
+    entrypoint: "./src/worker/index.ts",
+    name: "aged-pond-b37b",
+    observability: { enabled: true },
+  },
+});

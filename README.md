@@ -72,13 +72,13 @@ npm run preview
 Deploy your project to Cloudflare Workers:
 
 ```bash
-npm run build && npm run deploy
+npm run deploy
 ```
 
-Monitor your workers:
+Monitor your Worker (Wrangler still provides live log streaming):
 
 ```bash
-npx wrangler tail
+npx wrangler tail aged-pond-b37b
 ```
 
 ## Additional Resources
@@ -97,6 +97,6 @@ Requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. npm scripts use the locally
 - `npm run fmt` / `npm run fmt:check`: Oxfmt with the Ultracite formatting preset.
 - `npm test` / `npm run test:watch`: Vitest once or in watch mode.
 - `npm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`; all metrics require 80%.
-- `npm run check:deploy`: production build and Wrangler deployment dry run.
+- `npm run check:deploy`: production build and Cloudflare CLI deployment dry run.
 
-All tool configuration lives in `vite.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
+Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `npm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration. `wrangler.json` is retained for rollback until the first successful deployment with `cf`; development, builds, types, and deployment now use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
