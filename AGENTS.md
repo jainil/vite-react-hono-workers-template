@@ -5,6 +5,7 @@ STOP. Your knowledge of Cloudflare Workers APIs and limits may be outdated. Alwa
 ## Docs
 
 - https://developers.cloudflare.com/workers/
+- https://developers.cloudflare.com/cf/projects/
 - MCP: `https://docs.mcp.cloudflare.com/mcp`
 
 For all limits and quotas, retrieve from the product's `/platform/limits/` page. eg. `/workers/platform/limits`
@@ -13,15 +14,19 @@ For all limits and quotas, retrieve from the product's `/platform/limits/` page.
 
 | Command | Purpose |
 |---------|---------|
-| `npx wrangler dev` | Local development |
-| `npx wrangler deploy` | Deploy to Cloudflare |
-| `npx wrangler types` | Generate TypeScript types |
+| `pnpm run dev` | Local development (`cf dev`) |
+| `pnpm run build` | Generate types, type-check, and build with Vite Plus |
+| `pnpm run check:deploy` | Build and validate deployment without uploading |
+| `pnpm run deploy` | Build and deploy to Cloudflare |
+| `pnpm run cf-typegen` | Generate TypeScript types (`cf workers types`) |
 
-Run `wrangler types` after changing bindings in wrangler.jsonc.
+Worker configuration lives in `cloudflare.config.ts`. Run `pnpm run cf-typegen` after changing bindings; generated types live in `.cloudflare/types/index.d.ts`. Build settings, including Worker source maps, live in `vite.config.ts`.
+
+Use the pnpm scripts above so builds retain type checking and Vite Plus integration. Wrangler commands ignore `cloudflare.config.ts`.
 
 ## Local Explorer (Debugging & Inspection)
 
-When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
+When running `pnpm run dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
 
 Key endpoints (relative to the dev server URL):
 

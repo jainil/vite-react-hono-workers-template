@@ -4,17 +4,17 @@
   "description": "A template for building a React application with Vite, Hono, and Cloudflare Workers",
   "type": "module",
   "scripts": {
-    "build": "npm run cf-typegen && tsc -b && vp build",
+    "build": "pnpm run cf-typegen && tsc -b && vp build",
     "cf-typegen": "cf workers types",
-    "check:deploy": "npm run build && cf deploy --dry-run --prebuilt",
-    "check": "npm run cf-typegen && vp check",
-    "deploy": "npm run build && cf deploy --prebuilt",
+    "check:deploy": "pnpm run build && cf deploy --dry-run --prebuilt",
+    "check": "pnpm run cf-typegen && vp check",
+    "deploy": "pnpm run build && cf deploy --prebuilt",
     "dev": "cf dev",
     "fmt:check": "vp fmt --check",
     "fmt": "vp fmt",
     "lint:fix": "vp lint --fix",
     "lint": "vp lint",
-    "preview": "npm run build && vp preview",
+    "preview": "pnpm run build && vp preview",
     "test:coverage": "vp test run --coverage",
     "test:watch": "vp test",
     "test": "vp test run"
@@ -42,12 +42,10 @@
     "vite-plus": "1.3.0",
     "wrangler": "^4.151.1"
   },
-  "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.3.0"
-  },
   "engines": {
     "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
+  "packageManager": "pnpm@12.4.2",
   "cloudflare": {
     "label": "Vite React Template",
     "products": [

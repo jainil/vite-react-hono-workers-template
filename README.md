@@ -34,23 +34,23 @@ Get started in minutes with local development or deploy directly via the Cloudfl
 To start a new project with this template, run:
 
 ```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
+pnpm create cloudflare@latest --template=cloudflare/templates/vite-react-template
 ```
 
 A live deployment of this template is available at: [https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
 
 ## Development
 
-Install dependencies:
+Use pnpm `12.4.2` (pinned in `package.json`). Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Start the development server with:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Your application will be available at [http://localhost:5173](http://localhost:5173).
@@ -60,25 +60,25 @@ Your application will be available at [http://localhost:5173](http://localhost:5
 Build your project for production:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Preview your build locally:
 
 ```bash
-npm run preview
+pnpm run preview
 ```
 
 Deploy your project to Cloudflare Workers:
 
 ```bash
-npm run deploy
+pnpm run deploy
 ```
 
 Monitor your Worker (Wrangler still provides live log streaming):
 
 ```bash
-npx wrangler tail aged-pond-b37b
+pnpm exec wrangler tail aged-pond-b37b
 ```
 
 ## Additional Resources
@@ -90,13 +90,13 @@ npx wrangler tail aged-pond-b37b
 
 ## Tooling and tests
 
-Requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. npm scripts use the locally installed Vite+ CLI; no global installation is required.
+Requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. pnpm scripts use the locally installed Vite+ CLI; no global installation is required.
 
-- `npm run check`: formatting, type-aware lint, type checking, and tests.
-- `npm run lint` / `npm run lint:fix`: Oxlint with Ultracite core, React, and Vitest presets.
-- `npm run fmt` / `npm run fmt:check`: Oxfmt with the Ultracite formatting preset.
-- `npm test` / `npm run test:watch`: Vitest once or in watch mode.
-- `npm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`; all metrics require 80%.
-- `npm run check:deploy`: production build and Cloudflare CLI deployment dry run.
+- `pnpm run check`: formatting, type-aware lint, type checking, and tests.
+- `pnpm run lint` / `pnpm run lint:fix`: Oxlint with Ultracite core, React, and Vitest presets.
+- `pnpm run fmt` / `pnpm run fmt:check`: Oxfmt with the Ultracite formatting preset.
+- `pnpm test` / `pnpm run test:watch`: Vitest once or in watch mode.
+- `pnpm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`; all metrics require 80%.
+- `pnpm run check:deploy`: production build and Cloudflare CLI deployment dry run.
 
-Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `npm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration. `wrangler.json` is retained for rollback until the first successful deployment with `cf`; development, builds, types, and deployment now use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
+Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `pnpm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration. `wrangler.json` is retained for rollback until the first successful deployment with `cf`; development, builds, types, and deployment now use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
