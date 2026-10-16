@@ -1,5 +1,8 @@
 {
-	"files.associations": {
-		"wrangler.json": "jsonc"
-	}
+  "files.associations": { "wrangler.json": "jsonc" },
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.oxc": "explicit" },
+  "oxc.disableNestedConfig": true,
+  "oxc.fmt.disableNestedConfig": true
 }
