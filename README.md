@@ -1,17 +1,14 @@
 # vite-react-hono-workers-template
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, Oxlint and Oxfmt integration, and the flexibility of Workers deployments.
+This template provides a setup for building a React single page application with a Hono API backend, designed to run on Cloudflare Workers. It features hot module replacement, Oxlint and Oxfmt integration, and the flexibility of Workers deployments.
 
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
+The [official cloudflare template for this stack](https://github.com/cloudflare/templates/tree/main/vite-react-template) is uhh... outdated. This template starter brings many updates to the stack, including moving to viteplus and cf cli. It also adds some opinionated pieces:
 
-<!-- dash-content-start -->
-
-🚀 Supercharge your web development with this powerful stack:
-
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
+1. Ultracite based lint and format rules - these are especially helpful for keeping AI output readable.
+2. Typed client generation through orval - this allows for end to end type checking without having to use RPC based setup. The generated hooks use SWR (configurable).
+3. Wouter for frontend routing - for single page applications, this is the simplest routing setup.
+4. File structure - a suggested file structure is documented below. Extremely useful as the project grows.
+5. Unit and E2E testing - vitest and playwright.
 
 ### ✨ Key Features
 
@@ -19,8 +16,9 @@ This template provides a minimal setup for building a React application with Typ
 - 📦 TypeScript support out of the box
 - 🛠️ Ultracite lint and format presets via Vite+
 - ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
+- 🎯 API routes with Hono's elegant routing and OpenAPI documention generation
+- 🖥️ Typed API client generation with Orval
+- ⚛️ React SPA with Wouter based routing
 - 🔎 Built-in Observability to monitor your Worker
 
 Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
@@ -35,6 +33,20 @@ Clone the private repository with an authenticated GitHub account:
 gh repo clone jainil/vite-react-hono-workers-template
 cd vite-react-hono-workers-template
 ```
+
+## Template cleanup checklist
+
+When adapting this template for a product:
+
+- [ ] Replace the package name and description in `package.json`.
+- [ ] Replace `worker.name` in `cloudflare.config.ts` and the Worker name in the log-streaming command below.
+- [ ] Replace the README title, promotional image and copy, repository clone URL, and demo-specific documentation.
+- [ ] Replace the home page's stack heading, logos, documentation links, and starter styling; remove unused assets.
+- [ ] Replace the title and Vite favicon in `index.html`, and add product-specific description and social preview metadata.
+- [ ] Review the `cloudflare` metadata in `package.json`: label, preview icon and image URLs, categories, and publishing intent.
+- [ ] Replace the `Template API` title and review the API version in `src/worker/openapi.ts`.
+- [ ] Replace the counter, HMR instructions, API-name button, and greeting feature's `Durable` demo response; update the related frontend, Worker, and browser smoke tests.
+- [ ] Run `pnpm run api:generate` after API changes and commit both `openapi/openapi.json` and `src/react-app/shared/api/generated/client.ts`.
 
 ## Development
 
@@ -166,7 +178,7 @@ The live contract is available at `/api/openapi.json`. Generation needs no runni
 
 The greeting endpoint validates an optional `name` query parameter (trimmed, 1–100 characters) and returns HTTP 400 for invalid values. Without it, the response remains `{ "name": "Durable" }`. This follows the [Hono OpenAPI Zod guide](https://honohub.dev/docs/openapi/zod), including `resolver` for response documentation and Zod `.parse()` for runtime response validation and automatic validation-error documentation.
 
-The greeting page demonstrates `useGetGreeting` with conditional fetching until the button is clicked, SWR caching, and error handling. Use this workflow for new reads and writes; do not add handwritten fetch calls, separate Axios clients, Hono RPC clients, or duplicate frontend DTOs. Browser-safe schemas shared for other purposes may live in `src/shared/schemas/`; Worker bindings and secrets must stay in backend code.
+The greeting page calls the generated `getGreeting` plain fetcher when the button is clicked and manages loading, errors, and returned data locally. Use generated SWR hooks for queries that benefit from caching, deduplication, and revalidation, or generated plain fetchers for direct interactions like this button. Do not add handwritten fetch calls, separate Axios clients, Hono RPC clients, or duplicate frontend DTOs. Browser-safe schemas shared for other purposes may live in `src/shared/schemas/`; Worker bindings and secrets must stay in backend code.
 
 ### Test file locations
 
@@ -249,4 +261,4 @@ Requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. pnpm scripts use the locall
 - `pnpm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`; all metrics require 80%.
 - `pnpm run check:deploy`: production build and Cloudflare CLI deployment dry run.
 
-Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `pnpm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration. `wrangler.json` is retained for rollback until the first successful deployment with `cf`; development, builds, types, and deployment now use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
+Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `pnpm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration; development, builds, types, and deployment use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.
