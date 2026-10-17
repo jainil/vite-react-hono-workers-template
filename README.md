@@ -52,6 +52,131 @@ pnpm run dev
 
 Your application will be available at [http://localhost:5173](http://localhost:5173).
 
+## Folder structure
+
+The frontend and Worker use feature-first organization. Only folders needed by the starter are created; the growth examples below are conventions, not empty scaffolding.
+
+```text
+src/
+├── react-app/
+│   ├── main.tsx                         # React bootstrap and global styles
+│   ├── app.tsx                          # Application composition
+│   ├── app/
+│   │   ├── routes.tsx                   # Top-level Wouter routes and fallback
+│   │   └── routes.test.tsx              # Routing and not-found behavior
+│   ├── features/
+│   │   └── home/
+│   │       └── pages/
+│   │           ├── home-page.tsx        # Existing starter screen
+│   │           ├── home-page.css
+│   │           └── home-page.test.tsx    # Home screen behavior and API interaction
+│   ├── assets/
+│   ├── styles/
+│   │   └── globals.css
+│   ├── test/
+│   │   └── setup.ts
+│   └── vite-env.d.ts
+└── worker/
+    ├── index.ts                         # Worker entry point
+    ├── app.ts                           # Hono setup and route composition
+    ├── types.ts                         # Hono environment using generated Env
+    ├── features/
+    │   └── greeting/
+    │       ├── routes.ts                # Existing GET /api/ endpoint
+    │       └── routes.test.ts           # Greeting endpoint response
+    └── app.test.ts                      # Application-wide API fallback tests
+```
+
+### React application conventions
+
+Each product area owns its pages, components, data access, and state. A larger feature can grow into:
+
+```text
+features/projects/
+├── routes.tsx                           # Routes within /projects
+├── pages/
+│   ├── projects-page.tsx
+│   ├── project-detail-page.tsx
+│   └── project-settings-page.tsx
+├── components/
+│   ├── project-form.tsx
+│   ├── project-form.test.tsx
+│   └── project-form.module.css
+├── api/
+│   ├── queries.ts
+│   └── mutations.ts
+├── hooks/
+├── schemas.ts
+├── types.ts
+└── utils.ts
+```
+
+- Keep pages thin: compose the screen, read route parameters, and call feature hooks.
+- Keep feature code local. Promote reusable code into `react-app/shared/` when multiple features need it: `ui/` for buttons, inputs, dialogs, and tables; `components/` for shared compositions such as empty states; `hooks/` for domain-independent hooks; `lib/` for an API client and utilities; and `types/` for shared frontend types.
+- Keep dependencies flowing from `app` to `features` to `shared`. Shared frontend code must not import features. Avoid reaching into another feature's internal files; expose a deliberate public API when necessary.
+- Add `app/providers.tsx` for application-wide providers, `app/layouts/` for app and authentication shells, `app/guards/` for navigation guards, and `app/paths.ts` for shared URL builders when needed. Client guards do not replace API authorization.
+- Keep URL state such as filters and pagination in the URL, transient UI state local, and server data in a query cache when one is introduced. Add shared client state only for state that actually spans features.
+- Colocate component tests and styles. Keep global styles and design tokens in `styles/`. Add `test/render.tsx` when tests need a common provider wrapper.
+- Lazy-load substantial pages or features with React lazy loading and Suspense; place loading and error boundaries around the relevant route content.
+
+Wouter routing is explicit; directory names do not generate routes. The starter registers `/` and a final not-found route. Keep top-level composition in `app/routes.tsx`, then give larger features their own `routes.tsx`. Use a parent `Route` with `nest` to scope child paths:
+
+```tsx
+<Route path="/projects" nest>
+  <AppLayout>
+    <ProjectRoutes />
+  </AppLayout>
+</Route>
+```
+
+Inside `ProjectRoutes`, use a `Switch` with `/`, `/:projectId/settings`, `/:projectId`, and a final fallback. These match beneath `/projects`; each nested switch needs its own fallback. Links and locations are scoped inside nested routes; use `~/` to navigate from the application root. See the [Wouter documentation](https://github.com/molefrog/wouter#route-nesting).
+
+### Worker conventions
+
+Group backend code by domain and compose feature routers with Hono's `app.route()`. The starter keeps the existing greeting handler in one route module. Add layers only when a feature needs them:
+
+| File | Responsibility |
+| --- | --- |
+| `routes.ts` | Parse and validate requests, enforce access, call services, return HTTP responses |
+| `routes.test.ts` | Exercise endpoint behavior |
+| `service.ts` | Business rules, authorization rules, and multi-step operations |
+| `service.test.ts` | Verify business behavior |
+| `repository.ts` | Database queries and persistence |
+| `schemas.ts` | Runtime request validation |
+| `types.ts` | Feature-specific types |
+
+- Keep simple handlers in `routes.ts`. Extract services when business logic grows and repositories when persistence needs separation.
+- Keep Hono `Context` in the HTTP layer. Pass ordinary values and explicit dependencies or bindings into services rather than passing the entire request context.
+- Keep route handlers beside their route definitions to preserve parameter inference. Chain route registration and `app.route()` calls to retain the exported `AppType` for an optional Hono RPC client. See [Hono best practices](https://hono.dev/docs/guides/best-practices) and [Hono RPC](https://hono.dev/docs/guides/rpc).
+- Add `worker/middleware/` for shared authentication, request IDs, and error handling; `worker/integrations/` for external clients such as email and payments; and `worker/lib/` for shared errors and logging. Feature-specific helpers stay in their feature.
+- Keep `index.ts` as the runtime entry point and `app.ts` as HTTP application composition. Add scheduled handlers, queue consumers, Durable Objects, or Workflows only when those capabilities exist, consulting the current Cloudflare documentation first.
+- Reuse the generated `Env` through `worker/types.ts`; do not duplicate binding declarations. Update `cloudflare.config.ts` and run `pnpm run cf-typegen` when adding bindings.
+- Match frontend and backend feature names where useful, while allowing their responsibilities to evolve independently.
+
+### Contracts shared across frontend and Worker
+
+When needed, add `src/shared/contracts/` for API request and response contracts and `src/shared/schemas/` for browser-safe runtime schemas. This is distinct from frontend-only `react-app/shared/`. Keep shared contracts free of Worker bindings, database models, server integrations, and secrets. Use type-only imports for types. Runtime validation is still required for untrusted input; TypeScript types alone do not validate requests or responses.
+
+### Test file locations
+
+Colocate tests beside the module or feature they exercise, using `*.test.ts` or `*.test.tsx`:
+
+| Location | Coverage |
+| --- | --- |
+| `src/react-app/features/home/pages/home-page.test.tsx` | Counter interactions, API responses, failures, and invalid payloads |
+| `src/react-app/app/routes.test.tsx` | Application routing and the not-found fallback |
+| `src/react-app/test/setup.ts` | Shared jsdom setup and Testing Library cleanup; not a test suite |
+| `src/worker/features/greeting/routes.test.ts` | Greeting response at `/api/` through the composed Hono app |
+| `src/worker/app.test.ts` | Application-wide unknown-route fallback |
+
+As features grow, put isolated endpoint tests in `worker/features/<feature>/routes.test.ts`, business-rule tests beside `service.ts`, and React component tests beside their components. Keep tests that verify application-wide route composition beside `app.ts` or `app/routes.tsx`. Shared fixtures and render helpers belong in each application's `test/` directory when needed.
+
+Vite+ discovers tests recursively under `src/react-app/` and `src/worker/`, so colocated suites need no configuration changes. Frontend suites run in jsdom; Worker suites run in Node and do not verify Cloudflare bindings or runtime behavior. Run all suites with `pnpm test` or collect coverage with `pnpm run test:coverage`.
+
+### Structure decisions
+
+Feature ownership was chosen over global `pages/`, `hooks/`, `controllers/`, `services/`, and `repositories/` folders, which scatter related code across the application. Extra architecture layers, placeholder providers, authentication, persistence, and example product features are deferred until needed. The current starter behavior is retained, with Wouter providing explicit frontend routing. No additional clarification questions were needed.
+
 ## Production
 
 Build your project for production:

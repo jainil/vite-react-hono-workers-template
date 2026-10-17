@@ -22,7 +22,8 @@
   "dependencies": {
     "hono": "4.11.1",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "wouter": "^3.13.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^2.0.0-beta.v.1",
