@@ -184,6 +184,23 @@ As features grow, put isolated endpoint tests in `worker/features/<feature>/rout
 
 Vite+ discovers tests recursively under `src/react-app/` and `src/worker/`, so colocated suites need no configuration changes. Frontend suites run in jsdom; Worker suites run in Node and do not verify Cloudflare bindings or runtime behavior. Run all suites with `pnpm test` or collect coverage with `pnpm run test:coverage`.
 
+### Browser smoke test
+
+Install Chromium once, then run the single Playwright smoke test:
+
+```bash
+pnpm exec playwright install chromium
+pnpm run test:smoke
+```
+
+On Linux CI, use `pnpm exec playwright install --with-deps chromium` to install browser system dependencies too.
+
+The test in `e2e/smoke.test.ts` builds through `pnpm run preview` and starts the built application in the local Workers runtime on `127.0.0.1:4173`. It verifies the rendered home page, the API button's real JSON response and updated label, a direct unknown frontend navigation (HTTP 200 with the React not-found page), and an unknown API navigation (HTTP 404 with the JSON error). It also fails on uncaught browser errors. No API responses are mocked. This checks local production output and asset routing; it does not contact a deployed Cloudflare environment.
+
+Playwright manages server startup and shutdown and refuses to reuse an existing server, ensuring a development server or stale build cannot satisfy the test. Port 4173 must be free. Failure traces are saved under the ignored `test-results/` directory. The browser smoke test runs separately from the fast Node/jsdom suites.
+
+The asset configuration sends `/api` and `/api/*` to the Worker first so browser navigations receive API responses instead of the SPA shell. Other frontend navigations retain the SPA fallback. See Cloudflare's [SPA routing documentation](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/#advanced-routing-control).
+
 ### Structure decisions
 
 Feature ownership was chosen over global `pages/`, `hooks/`, `controllers/`, `services/`, and `repositories/` folders, which scatter related code across the application. Extra architecture layers, placeholder providers, authentication, persistence, and example product features are deferred until needed. The current starter behavior is retained, with Wouter providing explicit frontend routing. No additional clarification questions were needed.

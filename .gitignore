@@ -200,3 +200,7 @@ dist
 
 ### Cloudflare CLI ###
 .cloudflare/
+
+### Playwright ###
+test-results/
+playwright-report/
