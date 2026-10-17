@@ -21,7 +21,11 @@ describe("Greeting API", () => {
         `/api/?${new URLSearchParams({ name }).toString()}`
       );
       expect(response.status).toBe(400);
-      await expect(response.json()).resolves.toMatchObject({ success: false });
+      await expect(response.json()).resolves.toMatchObject({
+        code: "VALIDATION_ERROR",
+        details: [{ message: expect.any(String) as unknown }],
+        message: "Invalid request inputs",
+      });
     }
   );
 });

@@ -16,18 +16,20 @@ export interface Greeting {
   name: string;
 }
 
+export type _Schema0 = string | number | boolean | null | (_Schema0 | null)[] | {[key: string]: _Schema0 | null};
+
+export interface ApiError {
+  code: string;
+  details?: _Schema0 | null;
+  message: string;
+}
+
 export type GetGreetingParams = {
 /**
  * @minLength 1
  * @maxLength 100
  */
 name?: string;
-};
-
-export type GetGreeting400 = {
-  success: false;
-  error: unknown[];
-  data: unknown;
 };
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -73,7 +75,7 @@ export type GetGreetingQueryResult = NonNullable<Awaited<ReturnType<typeof getGr
 /**
  * @summary Get the greeting
  */
-export const useGetGreeting = <TError = GetGreeting400>(
+export const useGetGreeting = <TError = ApiError>(
   params?: GetGreetingParams, options?: { swr?:SWRConfiguration<Awaited<ReturnType<typeof getGreeting>>, TError> & { swrKey?: Key, enabled?: boolean }, request?: SecondParameter<typeof request> }
 ) => {
   const {swr: swrOptions, request: requestOptions} = options ?? {}

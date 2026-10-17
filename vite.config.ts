@@ -18,12 +18,6 @@ const generated = [
 ];
 
 export default defineConfig(({ mode }) => ({
-  resolve: {
-    alias: {
-      "@worker": fileURLToPath(new URL("./src/worker", import.meta.url)),
-      "~": fileURLToPath(new URL("./src/react-app", import.meta.url)),
-    },
-  },
   environments: {
     ssr: { build: { sourcemap: true } },
   },
@@ -44,6 +38,12 @@ export default defineConfig(({ mode }) => ({
     react(),
     ...(mode === "test" ? [] : [cloudflare()]),
   ]),
+  resolve: {
+    alias: {
+      "@worker": fileURLToPath(new URL("src/worker", import.meta.url)),
+      "~": fileURLToPath(new URL("src/react-app", import.meta.url)),
+    },
+  },
   test: {
     clearMocks: true,
     coverage: {

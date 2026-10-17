@@ -17,6 +17,55 @@
         "required": [
           "name"
         ]
+      },
+      "__schema0": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/__schema0"
+            }
+          },
+          {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/__schema0"
+            }
+          }
+        ]
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "$ref": "#/components/schemas/__schema0"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
       }
     }
   },
@@ -36,32 +85,24 @@
             "description": "The configured greeting"
           },
           "400": {
-            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ]
-                    },
-                    "error": {
-                      "type": "array",
-                      "items": {}
-                    },
-                    "data": {}
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ApiError"
                 }
               }
-            }
+            },
+            "description": "Invalid request inputs"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unexpected server error"
           }
         },
         "summary": "Get the greeting",
