@@ -4,7 +4,7 @@
   "description": "A template for building a React application with Vite, Hono, and Cloudflare Workers",
   "type": "module",
   "scripts": {
-    "api:generate": "node --import tsx scripts/generate-openapi.ts && orval",
+    "api:generate": "TSX_TSCONFIG_PATH=tsconfig.codegen.json node --import tsx scripts/generate-openapi.ts && orval",
     "build": "pnpm run api:generate && pnpm run cf-typegen && tsc -b && vp build",
     "cf-typegen": "cf workers types",
     "check:deploy": "pnpm run build && cf deploy --dry-run --prebuilt",

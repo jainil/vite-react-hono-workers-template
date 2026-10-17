@@ -1,6 +1,6 @@
 import { Route, Switch } from "wouter";
 
-import HomePage from "../features/home/pages/home-page";
+import HomePage from "~/features/home/pages/home-page";
 
 export const AppRoutes = () => (
   <Switch>

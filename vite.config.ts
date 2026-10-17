@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { cloudflare } from "@cloudflare/vite-plugin";
 import react from "@vitejs/plugin-react";
 import ultraciteFmt from "ultracite/oxfmt";
@@ -16,6 +18,12 @@ const generated = [
 ];
 
 export default defineConfig(({ mode }) => ({
+  resolve: {
+    alias: {
+      "@worker": fileURLToPath(new URL("./src/worker", import.meta.url)),
+      "~": fileURLToPath(new URL("./src/react-app", import.meta.url)),
+    },
+  },
   environments: {
     ssr: { build: { sourcemap: true } },
   },

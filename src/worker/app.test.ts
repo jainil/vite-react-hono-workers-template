@@ -1,6 +1,5 @@
+import { app } from "@worker/app";
 import { describe, expect, it } from "vite-plus/test";
-
-import { app } from "./app";
 
 describe("API", () => {
   it("serves the typed OpenAPI contract", async () => {

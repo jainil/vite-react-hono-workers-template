@@ -1,6 +1,5 @@
+import { app } from "@worker/app";
 import { describe, expect, it } from "vite-plus/test";
-
-import { app } from "../../app";
 
 describe("Greeting API", () => {
   it("returns the configured name", async () => {

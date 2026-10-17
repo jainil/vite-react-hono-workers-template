@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import cloudflareLogo from "../../../assets/Cloudflare_Logo.svg";
-import honoLogo from "../../../assets/hono.svg";
-import reactLogo from "../../../assets/react.svg";
-import { getGreeting } from "../../../shared/api/generated/client";
+import cloudflareLogo from "~/assets/Cloudflare_Logo.svg";
+import honoLogo from "~/assets/hono.svg";
+import reactLogo from "~/assets/react.svg";
+import { getGreeting } from "~/shared/api/generated/client";
 
 import "./home-page.css";
 

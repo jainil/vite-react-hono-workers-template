@@ -14,6 +14,9 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "paths": {
+      "~/*": ["./src/react-app/*"]
+    },
 
     /* Linting */
     "strict": true,
