@@ -1,0 +1,85 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Template API",
+    "description": "Development documentation",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Greeting": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/api/": {
+      "get": {
+        "operationId": "getGreeting",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Greeting"
+                }
+              }
+            },
+            "description": "The configured greeting"
+          },
+          "400": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "data": {}
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the greeting",
+        "tags": [
+          "greeting"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          }
+        ]
+      }
+    }
+  }
+}

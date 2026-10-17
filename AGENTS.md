@@ -65,3 +65,9 @@ If the application uses Durable Objects or Workflows, refer to the relevant best
 
 - Durable Objects: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
 - Workflows: https://developers.cloudflare.com/workflows/build/rules-of-workflows/
+
+## API contracts and frontend data fetching
+
+All frontend API data fetching must use Orval-generated SWR hooks or plain fetchers. Use SWR hooks for cached queries that benefit from caching, deduplication, and revalidation. Orval-generated plain fetchers may be called directly in click handlers where they fit better; callers must manage loading, errors, and returned data themselves. Both use the generated types and shared transport. Define request and response schemas in the Worker feature's `schemas.ts` using Zod. Follow https://honohub.dev/docs/openapi/zod: import `validator as zValidator` from `hono-openapi`, validate all request inputs with Zod, and consume parsed values via `c.req.valid()`. Use stable `operationId` values in `describeRoute`, and `resolver(responseSchema)` in response documentation. Validate outgoing response bodies with the same Zod schema using `.parse()` before returning them. Document every response status and body.
+
+Run `pnpm run api:generate` after API changes. It exports the Hono OpenAPI contract to `openapi/openapi.json` and regenerates `src/react-app/shared/api/generated/client.ts`. Commit both artifacts; never hand-edit them. Development, builds, and checks regenerate automatically. The same spec is served at `/api/openapi.json`. Keep generating SWR query and mutation hooks, and use generated hooks or plain fetchers in features according to the guidance above; do not add handwritten fetch calls, Axios clients, Hono RPC clients, or duplicate frontend DTOs.

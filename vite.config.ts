@@ -6,7 +6,14 @@ import ultraciteReact from "ultracite/oxlint/react";
 import vitest from "ultracite/oxlint/vitest";
 import { defineConfig, lazyPlugins } from "vite-plus";
 
-const generated = ["dist/**", ".wrangler/**", ".cloudflare/**", "coverage/**"];
+const generated = [
+  "dist/**",
+  ".wrangler/**",
+  ".cloudflare/**",
+  "coverage/**",
+  "src/react-app/shared/api/generated/**",
+  "openapi/**",
+];
 
 export default defineConfig(({ mode }) => ({
   environments: {
@@ -36,6 +43,7 @@ export default defineConfig(({ mode }) => ({
         "**/*.d.ts",
         "**/*.{test,spec}.{ts,tsx}",
         "**/test/**",
+        "src/react-app/shared/api/generated/**",
         "src/react-app/main.tsx",
       ],
       include: ["src/react-app/**/*.{ts,tsx}", "src/worker/**/*.ts"],

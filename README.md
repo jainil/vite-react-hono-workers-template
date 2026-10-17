@@ -115,7 +115,7 @@ features/projects/
 - Keep feature code local. Promote reusable code into `react-app/shared/` when multiple features need it: `ui/` for buttons, inputs, dialogs, and tables; `components/` for shared compositions such as empty states; `hooks/` for domain-independent hooks; `lib/` for an API client and utilities; and `types/` for shared frontend types.
 - Keep dependencies flowing from `app` to `features` to `shared`. Shared frontend code must not import features. Avoid reaching into another feature's internal files; expose a deliberate public API when necessary.
 - Add `app/providers.tsx` for application-wide providers, `app/layouts/` for app and authentication shells, `app/guards/` for navigation guards, and `app/paths.ts` for shared URL builders when needed. Client guards do not replace API authorization.
-- Keep URL state such as filters and pagination in the URL, transient UI state local, and server data in a query cache when one is introduced. Add shared client state only for state that actually spans features.
+- Keep URL state such as filters and pagination in the URL, transient UI state local, and server data in SWR through generated hooks. Add shared client state only for state that actually spans features.
 - Colocate component tests and styles. Keep global styles and design tokens in `styles/`. Add `test/render.tsx` when tests need a common provider wrapper.
 - Lazy-load substantial pages or features with React lazy loading and Suspense; place loading and error boundaries around the relevant route content.
 
@@ -147,15 +147,26 @@ Group backend code by domain and compose feature routers with Hono's `app.route(
 
 - Keep simple handlers in `routes.ts`. Extract services when business logic grows and repositories when persistence needs separation.
 - Keep Hono `Context` in the HTTP layer. Pass ordinary values and explicit dependencies or bindings into services rather than passing the entire request context.
-- Keep route handlers beside their route definitions to preserve parameter inference. Chain route registration and `app.route()` calls to retain the exported `AppType` for an optional Hono RPC client. See [Hono best practices](https://hono.dev/docs/guides/best-practices) and [Hono RPC](https://hono.dev/docs/guides/rpc).
+- Keep route handlers beside their route definitions to preserve parameter inference. Chain route registration and `app.route()` calls to retain the exported `AppType` for backend route typing. See [Hono best practices](https://hono.dev/docs/guides/best-practices) and [Hono RPC](https://hono.dev/docs/guides/rpc).
 - Add `worker/middleware/` for shared authentication, request IDs, and error handling; `worker/integrations/` for external clients such as email and payments; and `worker/lib/` for shared errors and logging. Feature-specific helpers stay in their feature.
 - Keep `index.ts` as the runtime entry point and `app.ts` as HTTP application composition. Add scheduled handlers, queue consumers, Durable Objects, or Workflows only when those capabilities exist, consulting the current Cloudflare documentation first.
 - Reuse the generated `Env` through `worker/types.ts`; do not duplicate binding declarations. Update `cloudflare.config.ts` and run `pnpm run cf-typegen` when adding bindings.
 - Match frontend and backend feature names where useful, while allowing their responsibilities to evolve independently.
 
-### Contracts shared across frontend and Worker
+### API contracts and data fetching
 
-When needed, add `src/shared/contracts/` for API request and response contracts and `src/shared/schemas/` for browser-safe runtime schemas. This is distinct from frontend-only `react-app/shared/`. Keep shared contracts free of Worker bindings, database models, server integrations, and secrets. Use type-only imports for types. Runtime validation is still required for untrusted input; TypeScript types alone do not validate requests or responses.
+All frontend API data fetching uses this pipeline:
+
+1. Define Zod request and response schemas in `worker/features/<feature>/schemas.ts`.
+2. Register routes with `hono-openapi`: `validator as zValidator` from `hono-openapi` validates and documents Zod request schemas; handlers consume parsed input with `c.req.valid()`; `describeRoute` supplies a stable `operationId`, and `resolver` documents Zod response schemas. Parse response bodies with those schemas before returning typed JSON. Document each status and response body.
+3. Run `pnpm run api:generate` to export `openapi/openapi.json` from the Hono app and generate the typed SWR client at `src/react-app/shared/api/generated/client.ts` with Orval.
+4. Import generated SWR query and mutation hooks into frontend features. Keep server state in SWR; feature wrappers may compose generated hooks.
+
+The live contract is available at `/api/openapi.json`. Generation needs no running server or Cloudflare credentials. Development, builds, and checks regenerate the client automatically; rerun generation after editing routes during development. Commit the specification and generated client together, and never edit generated files manually. Generated code is type-checked but excluded from lint, formatting, and coverage.
+
+The greeting endpoint validates an optional `name` query parameter (trimmed, 1–100 characters) and returns HTTP 400 for invalid values. Without it, the response remains `{ "name": "Durable" }`. This follows the [Hono OpenAPI Zod guide](https://honohub.dev/docs/openapi/zod), including `resolver` for response documentation and Zod `.parse()` for runtime response validation and automatic validation-error documentation.
+
+The greeting page demonstrates `useGetGreeting` with conditional fetching until the button is clicked, SWR caching, and error handling. Use this workflow for new reads and writes; do not add handwritten fetch calls, separate Axios clients, Hono RPC clients, or duplicate frontend DTOs. Browser-safe schemas shared for other purposes may live in `src/shared/schemas/`; Worker bindings and secrets must stay in backend code.
 
 ### Test file locations
 
@@ -163,7 +174,7 @@ Colocate tests beside the module or feature they exercise, using `*.test.ts` or 
 
 | Location | Coverage |
 | --- | --- |
-| `src/react-app/features/home/pages/home-page.test.tsx` | Counter interactions, API responses, failures, and invalid payloads |
+| `src/react-app/features/home/pages/home-page.test.tsx` | Counter interactions, API responses, network and HTTP failures |
 | `src/react-app/app/routes.test.tsx` | Application routing and the not-found fallback |
 | `src/react-app/test/setup.ts` | Shared jsdom setup and Testing Library cleanup; not a test suite |
 | `src/worker/features/greeting/routes.test.ts` | Greeting response at `/api/` through the composed Hono app |

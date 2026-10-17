@@ -3,6 +3,7 @@ import { useState } from "react";
 import cloudflareLogo from "../../../assets/Cloudflare_Logo.svg";
 import honoLogo from "../../../assets/hono.svg";
 import reactLogo from "../../../assets/react.svg";
+import { getGreeting } from "../../../shared/api/generated/client";
 
 import "./home-page.css";
 
@@ -11,22 +12,17 @@ const viteLogo = "/vite.svg";
 const HomePage = () => {
   const [count, setCount] = useState(0);
   const [name, setName] = useState("unknown");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loadName = async () => {
+  const handleGetGreeting = async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/");
-      const data: unknown = await response.json();
-      if (
-        typeof data === "object" &&
-        data !== null &&
-        "name" in data &&
-        typeof data.name === "string"
-      ) {
-        setName(data.name);
-      }
+      const greeting = await getGreeting();
+      setName(greeting.name);
     } catch {
       setName("unavailable");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -73,8 +69,9 @@ const HomePage = () => {
         <button
           type="button"
           onClick={() => {
-            void loadName();
+            void handleGetGreeting();
           }}
+          disabled={isLoading}
           aria-label="get name"
         >
           Name from API is: {name}
