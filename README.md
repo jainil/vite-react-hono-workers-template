@@ -1,6 +1,4 @@
-# React + Vite + Hono + Cloudflare Workers
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+# vite-react-hono-workers-template
 
 This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, Oxlint and Oxfmt integration, and the flexibility of Workers deployments.
 
@@ -31,13 +29,12 @@ Get started in minutes with local development or deploy directly via the Cloudfl
 
 ## Getting Started
 
-To start a new project with this template, run:
+Clone the private repository with an authenticated GitHub account:
 
 ```bash
-pnpm create cloudflare@latest --template=cloudflare/templates/vite-react-template
+gh repo clone jainil/vite-react-hono-workers-template
+cd vite-react-hono-workers-template
 ```
-
-A live deployment of this template is available at: [https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
 
 ## Development
 
@@ -78,7 +75,7 @@ pnpm run deploy
 Monitor your Worker (Wrangler still provides live log streaming):
 
 ```bash
-pnpm exec wrangler tail aged-pond-b37b
+pnpm exec wrangler tail vite-react-hono-workers-template
 ```
 
 ## Additional Resources

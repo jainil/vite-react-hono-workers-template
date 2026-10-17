@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-template",
+  "name": "vite-react-hono-workers-template",
   "private": true,
   "description": "A template for building a React application with Vite, Hono, and Cloudflare Workers",
   "type": "module",
@@ -47,7 +47,7 @@
   },
   "packageManager": "pnpm@12.4.2",
   "cloudflare": {
-    "label": "Vite React Template",
+    "label": "Vite React Hono Workers Template",
     "products": [
       "Workers"
     ],

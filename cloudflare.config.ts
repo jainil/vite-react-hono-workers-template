@@ -6,7 +6,7 @@ export default defineConfig({
     compatibilityDate: "2025-10-08",
     compatibilityFlags: ["nodejs_compat"],
     entrypoint: "./src/worker/index.ts",
-    name: "aged-pond-b37b",
+    name: "vite-react-hono-workers-template",
     observability: { enabled: true },
   },
 });
