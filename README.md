@@ -50,7 +50,7 @@ When adapting this template for a product:
 
 ## Development
 
-Use pnpm `12.4.2` (pinned in `package.json`). Install dependencies:
+Use pnpm `12.15.0` (pinned in `package.json`). Install dependencies:
 
 ```bash
 pnpm install
@@ -163,6 +163,7 @@ Group backend code by domain and compose feature routers with Hono's `app.route(
 - Add `worker/middleware/` for shared authentication, request IDs, and error handling; `worker/integrations/` for external clients such as email and payments; and `worker/lib/` for shared errors and logging. Feature-specific helpers stay in their feature.
 - Keep `index.ts` as the runtime entry point and `app.ts` as HTTP application composition. Add scheduled handlers, queue consumers, Durable Objects, or Workflows only when those capabilities exist, consulting the current Cloudflare documentation first.
 - Reuse the generated `Env` through `worker/types.ts`; do not duplicate binding declarations. Update `cloudflare.config.ts` and run `pnpm run cf-typegen` when adding bindings.
+- Use the native `#worker/*` package imports defined in `package.json` for Worker modules. Relative TypeScript imports must include `.ts`. Use explicit type-only imports and erasable TypeScript syntax; the backend configuration checks these requirements for Node's built-in type stripping.
 - Match frontend and backend feature names where useful, while allowing their responsibilities to evolve independently.
 
 ### API contracts and data fetching
@@ -174,7 +175,7 @@ All frontend API data fetching uses this pipeline:
 3. Run `pnpm run api:generate` to export `openapi/openapi.json` from the Hono app and generate the typed SWR client at `src/react-app/shared/api/generated/client.ts` with Orval.
 4. Import generated SWR query and mutation hooks into frontend features. Keep server state in SWR; feature wrappers may compose generated hooks.
 
-The live contract is available at `/api/openapi.json`. Generation needs no running server or Cloudflare credentials. Development, builds, and checks regenerate the client automatically; rerun generation after editing routes during development. Commit the specification and generated client together, and never edit generated files manually. Generated code is type-checked but excluded from lint, formatting, and coverage.
+The live contract is available at `/api/openapi.json`. Generation executes the Worker source directly with `node scripts/generate-openapi.ts`, using Node's built-in TypeScript stripping without a loader or emitted JavaScript. It needs no running server or Cloudflare credentials. Development, builds, and checks regenerate the client automatically; rerun generation after editing routes during development. Commit the specification and generated client together, and never edit generated files manually. Generated code is type-checked but excluded from lint, formatting, and coverage.
 
 The greeting endpoint validates an optional `name` query parameter (trimmed, 1–100 characters) and returns HTTP 400 for invalid values. Without it, the response remains `{ "name": "Durable" }`. This follows the [Hono OpenAPI Zod guide](https://honohub.dev/docs/openapi/zod), including `resolver` for response documentation and Zod `.parse()` for runtime response validation and automatic validation-error documentation.
 
@@ -191,10 +192,13 @@ Colocate tests beside the module or feature they exercise, using `*.test.ts` or 
 | `src/react-app/test/setup.ts` | Shared jsdom setup and Testing Library cleanup; not a test suite |
 | `src/worker/features/greeting/routes.test.ts` | Greeting response at `/api/` through the composed Hono app |
 | `src/worker/app.test.ts` | Application-wide unknown-route fallback |
+| `scripts/worker-native.test.ts` | Worker entrypoint and HTTP responses executed directly by Node's native TypeScript support |
 
 As features grow, put isolated endpoint tests in `worker/features/<feature>/routes.test.ts`, business-rule tests beside `service.ts`, and React component tests beside their components. Keep tests that verify application-wide route composition beside `app.ts` or `app/routes.tsx`. Shared fixtures and render helpers belong in each application's `test/` directory when needed.
 
 Vite+ discovers tests recursively under `src/react-app/` and `src/worker/`, so colocated suites need no configuration changes. Frontend suites run in jsdom; Worker suites run in Node and do not verify Cloudflare bindings or runtime behavior. Run all suites with `pnpm test` or collect coverage with `pnpm run test:coverage`.
+
+Both commands also run `pnpm run test:worker:native`, which uses `node --test scripts/worker-native.test.ts` to load the actual Worker entrypoint without a transpiler or custom loader. This verifies native source execution in Node. Cloudflare deployment still bundles the Worker as JavaScript through Vite+; the deployed Workers runtime does not use Node's TypeScript loader.
 
 ### Browser smoke test
 
@@ -252,13 +256,14 @@ pnpm exec wrangler tail vite-react-hono-workers-template
 
 ## Tooling and tests
 
-Requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. pnpm scripts use the locally installed Vite+ CLI; no global installation is required.
+Targets Node.js 24 LTS or newer (`^24.22.0 || >=26.12.0`); the minimum patch versions follow the Cloudflare CLI requirements. Node 22 is no longer supported. pnpm scripts use the locally installed Vite+ CLI; no global installation is required.
 
-- `pnpm run check`: formatting, type-aware lint, type checking, and tests.
+- `pnpm run check`: formatting, type-aware lint, and type checking.
 - `pnpm run lint` / `pnpm run lint:fix`: Oxlint with Ultracite core, React, and Vitest presets.
 - `pnpm run fmt` / `pnpm run fmt:check`: Oxfmt with the Ultracite formatting preset.
-- `pnpm test` / `pnpm run test:watch`: Vitest once or in watch mode.
-- `pnpm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`; all metrics require 80%.
+- `pnpm test`: Vitest followed by the native Worker source test; `pnpm run test:watch` watches the Vitest suites.
+- `pnpm run test:worker:native`: execute the TypeScript Worker entrypoint with Node's built-in test runner and type stripping.
+- `pnpm run test:coverage`: V8 coverage with text, HTML, and LCOV reports in `coverage/`, followed by the native Worker source test; all coverage metrics require 80%.
 - `pnpm run check:deploy`: production build and Cloudflare CLI deployment dry run.
 
 Worker configuration lives in `cloudflare.config.ts`; build, lint, formatting, and test configuration lives in `vite.config.ts`. Run `pnpm run cf-typegen` to regenerate Worker types in `.cloudflare/types/`. The Cloudflare CLI and Vite plugin use the beta programmatic configuration; development, builds, types, and deployment use `cloudflare.config.ts`. React tests run in jsdom with Testing Library and automatic cleanup. API tests exercise Hono routing in Node; these are unit tests, not Workers runtime or binding integration tests. Cloudflare plugins are disabled in test mode. Generated Worker types and build output are excluded from linting and formatting.

@@ -16,7 +16,8 @@
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "__schema0": {
         "anyOf": [
@@ -65,7 +66,8 @@
         "required": [
           "code",
           "message"
-        ]
+        ],
+        "additionalProperties": false
       }
     }
   },

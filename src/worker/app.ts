@@ -1,9 +1,10 @@
-import { greetingRoutes } from "@worker/features/greeting/routes";
-import { openapiOptions } from "@worker/openapi";
-import { apiErrorSchema, handleError } from "@worker/shared/errors";
-import type { AppEnv } from "@worker/types";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
+
+import { greetingRoutes } from "#worker/features/greeting/routes";
+import { openapiOptions } from "#worker/openapi";
+import { apiErrorSchema, handleError } from "#worker/shared/errors";
+import type { AppEnv } from "#worker/types";
 
 export const app = new Hono<AppEnv>().route("/api/", greetingRoutes);
 

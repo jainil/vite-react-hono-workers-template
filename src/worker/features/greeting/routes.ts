@@ -1,11 +1,12 @@
+import { Hono } from "hono";
+import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
+
 import {
   greetingQuerySchema,
   greetingSchema,
-} from "@worker/features/greeting/schemas";
-import { apiErrorSchema, errorResponse } from "@worker/shared/errors";
-import type { AppEnv } from "@worker/types";
-import { Hono } from "hono";
-import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
+} from "#worker/features/greeting/schemas";
+import { apiErrorSchema, errorResponse } from "#worker/shared/errors";
+import type { AppEnv } from "#worker/types";
 
 export const greetingRoutes = new Hono<AppEnv>().get(
   "/",

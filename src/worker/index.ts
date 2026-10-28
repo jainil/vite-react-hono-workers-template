@@ -1,1 +1,1 @@
-export { app as default } from "@worker/app";
+export { app as default } from "#worker/app";

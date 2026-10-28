@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "module": "NodeNext",
     "skipLibCheck": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    /* Native Node.js TypeScript execution */
+    "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "verbatimModuleSyntax": true,
 
     /* Linting */
     "strict": true,

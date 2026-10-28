@@ -1,8 +1,9 @@
-import { app } from "@worker/app";
-import { handleError } from "@worker/shared/errors";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it, vi } from "vite-plus/test";
+
+import { app } from "#worker/app";
+import { handleError } from "#worker/shared/errors";
 
 describe("API", () => {
   it("serves the typed OpenAPI contract", async () => {
